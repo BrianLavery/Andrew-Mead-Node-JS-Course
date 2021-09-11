@@ -11,19 +11,20 @@ const address = process.argv[2]
 if (!address) {
   console.log(chalk.red.bold('Please provide an address'))
 } else {
-  geocode(address, (error, { latitude, longitude, location } = {}) => {
+  geocode(address, (error, data) => {
     if (error) {
       // Use return here to stop the function at this point if an error
       return console.log(chalk.red.bold('Error: ', error))
     } 
       
-    forecast(latitude, longitude, (error, forecastData) => {
+    forecast(data.latitude, data.longitude, (error, forecastData) => {
       if (error) {
         return console.log(chalk.red.bold('Error: ', error))
       }
       
-      console.log(location)
-      console.log(forecastData)
+      
+      console.log(data.location)
+      console.log(forecastData.summary)
     })
   })
 }
