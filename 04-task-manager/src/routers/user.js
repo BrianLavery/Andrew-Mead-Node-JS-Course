@@ -15,6 +15,17 @@ router.post('/users', async (req, res) => {
   }
 })
 
+// User sign in
+router.post('/users/login', async (req, res) => {
+  try {
+    // This is a custom function we define
+    const user = await User.findByCredentials(req.body.email, req.body.password)
+    res.send(user)
+  } catch (e) {
+    res.status(400).send()
+  }
+})
+
 // Users index
 router.get('/users', async (req, res) => {
   try {
@@ -57,7 +68,15 @@ router.patch('/users/:id', async (req, res) => {
   try {
     // The new option returns the new instance of user as opposed to existing one before update
     // runValidators ensures we validate the data
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    // findByIdAndUpdate method bypasses middleware and Mongoose - that's why we had to set runValidators
+    // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    // We use the 3 lines of code below to get middleware to run
+
+    const user = await User.findById(req.params.id)
+
+    updates.forEach(update => user[update] = req.body[update])
+
+    await user.save() // This is where middleware gets executed
 
     if (!user) {
       return res.status(404).send()
