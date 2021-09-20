@@ -31,8 +31,13 @@ router.post('/users/login', async (req, res) => {
 
 // Users index
 // We pass in auth as a function to get it to be run on this route
-router.get('/users/me', auth, async (req, res) => {
-  res.send(req.user)
+router.get('/users', auth, async (req, res) => {
+  try {
+    const users = await User.find({})
+    res.send(users)
+  } catch (e) {
+    res.status(500).send()
+  }
 })
 
 // Show user

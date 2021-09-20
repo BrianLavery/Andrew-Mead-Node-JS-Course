@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 // We need schema for a bunch of custom methods, e.g. to use bcrypt prior to save, to define custom methodds
 const userSchema = new mongoose.Schema({
@@ -40,10 +41,28 @@ const userSchema = new mongoose.Schema({
           throw new Error('Age must be a positive number')
         }
       }
-  }
+  },
+  tokens: [{
+    token: {
+      type: String,
+      required: true
+    }
+  }]
 })
 
-// We are defining a custom method for the model
+// Instance method for user
+userSchema.methods.generateAuthToken = async function () {
+  const user = this // Line not required but makes easier to read
+  const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse')
+  
+  user.tokens = user.tokens.concat({ token })
+  // user.tokens.push(token)
+  await user.save()
+  
+  return token
+}
+
+// We are defining a custom method for the model - on the User class/ model
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email })
 
