@@ -50,13 +50,33 @@ const userSchema = new mongoose.Schema({
   }]
 })
 
+// Set public profile for info to send to client
+// userSchema.methods.getPublicProfile = function () {
+//   const user = this
+//   const userObject = user.toObject()
+//   delete userObject.password // Remove password so don't share back to user
+//   delete userObject.tokens // Remove tokens array so don't share back to user
+//   return userObject
+// }
+
+// Shortcut way to ensure we share limited info back to client on a user
+// Presumably this is overriding an ancestor class method
+userSchema.methods.toJSON = function () {
+  const user = this
+  const userObject = user.toObject()
+  delete userObject.password
+  delete userObject.tokens
+  return userObject
+}
+
+
 // Instance method for user
 userSchema.methods.generateAuthToken = async function () {
   const user = this // Line not required but makes easier to read
   const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse')
   
   user.tokens = user.tokens.concat({ token })
-  // user.tokens.push(token)
+  // user.tokens.push({ token }) // Alternative approach
   await user.save()
   
   return token

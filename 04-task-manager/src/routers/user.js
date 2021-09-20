@@ -29,6 +29,33 @@ router.post('/users/login', async (req, res) => {
   }
 })
 
+// User log out
+router.post('/users/logout', auth, async (req, res) => {
+  try {
+    // Loop through tokens array and filter so we exclude the current token being used for logout
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token
+    })
+    // Then we save
+    await req.user.save()
+
+    res.send() // Will send back a 200
+  } catch (e) {
+    res.status(500).send() // Send back 500 if didn't work
+  }
+})
+
+// User logout all sessions
+router.post('/users/logoutAll', auth, async (req, res) => {
+  try {
+    req.user.tokens = [] // Wipe all tokens
+    await req.user.save() // Save user
+    res.send() // Send back 200 status
+  } catch (e) {
+    res.status(500).send() // Send
+  }
+})
+
 // Users index
 // We pass in auth as a function to get it to be run on this route
 router.get('/users/me', auth, async (req, res) => {

@@ -11,6 +11,7 @@ const auth = async (req, res, next) => {
       throw new Error()
     }
 
+    req.token = token
     req.user = user // We pass user variable to route handlers by storing on req
     next()
   } catch (e) {
