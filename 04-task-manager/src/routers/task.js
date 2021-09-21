@@ -1,10 +1,15 @@
 const express = require('express')
 const Task = require('../models/task')
+const auth = require('../middleware/auth')
 const router = new express.Router()
 
 // Create Task
-router.post('/tasks', async (req, res) => {
-  const task = new Task(req.body)
+router.post('/tasks', auth, async (req, res) => {
+  // const task = new Task(req.body)
+  const task = new Task({
+    ...req.body, // Spread operator copies over attributes from req.body
+    user: req.user._id // get this from authentication
+  })
   
   try {
     await task.save()
