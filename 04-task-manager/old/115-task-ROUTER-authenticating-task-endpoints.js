@@ -5,6 +5,7 @@ const router = new express.Router()
 
 // Create Task
 router.post('/tasks', auth, async (req, res) => {
+  // const task = new Task(req.body)
   const task = new Task({
     ...req.body, // Spread operator copies over attributes from req.body
     user: req.user._id // get this from authentication
@@ -22,6 +23,7 @@ router.post('/tasks', auth, async (req, res) => {
 router.get('/tasks', auth, async (req, res) => {
   
   try {
+    // const tasks = await Task.find({ user: req.user._id }) // This approach also works
     await req.user.populate('tasks').execPopulate()
     res.send(req.user.tasks)
   } catch (e) {
@@ -56,7 +58,10 @@ router.patch('/tasks/:id', auth, async (req, res) => {
   }
 
   try {
+    // const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    
     const task = await Task.findOne({ _id: req.params.id, user: req.user._id })
+    // const task = await Task.findById(req.params.id)
 
     if (!task) {
       return res.status(404).send()
@@ -73,6 +78,7 @@ router.patch('/tasks/:id', auth, async (req, res) => {
 
 router.delete('/tasks/:id', auth, async (req, res) => {
   try {
+    // const task = await Task.findByIdAndDelete(req.params.id)
     const task = await Task.findOneAndDelete({ _id: req.params.id, user: req.user._id })
 
     if (!task) {

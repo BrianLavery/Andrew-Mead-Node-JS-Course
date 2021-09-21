@@ -79,6 +79,7 @@ router.patch('/users/me', auth, async (req, res) => {
   }
 })
 
+// One option is to delete tasks from here but in general better to use middleware
 router.delete('/users/me', auth, async (req, res) => {
   try {
     await req.user.remove() // This removes the authenticated user in one command (Mongoose method)

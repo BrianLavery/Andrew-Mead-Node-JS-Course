@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 // We need schema for a bunch of custom methods, e.g. to use bcrypt prior to save, to define custom methodds
 const userSchema = new mongoose.Schema({
@@ -124,7 +125,14 @@ userSchema.pre('save', async function (next) {
     user.password = await bcrypt.hash(user.password, 8)
   }
 
-  next()
+  next() // Let's Mongoose know when we are done
+})
+
+// Middleware to delete user tasks when user is removed
+userSchema.pre('remove', async function (next) {
+  const user = this
+  await Task.deleteMany({ user: user._id }) // This will delete all tasks belonging to this user
+  next() // Let's Mongoose know when we are done
 })
 
 const User = mongoose.model('User', userSchema)
