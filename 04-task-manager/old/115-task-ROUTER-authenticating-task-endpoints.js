@@ -5,6 +5,7 @@ const router = new express.Router()
 
 // Create Task
 router.post('/tasks', auth, async (req, res) => {
+  // const task = new Task(req.body)
   const task = new Task({
     ...req.body, // Spread operator copies over attributes from req.body
     user: req.user._id // get this from authentication
@@ -18,32 +19,12 @@ router.post('/tasks', auth, async (req, res) => {
   }
 })
 
-// Tasks index with optional search parameters
-// GET /tasks?completed={true/false}?&limit={int}&skip={int}&sortBy=createdAt:{asc/desc}
-// When pass in 2 values to the params we tend to separate by special character, e.g. '_', ':'
+// Tasks index
 router.get('/tasks', auth, async (req, res) => {
-  const match = {}
-  const sort = {}
-
-  if (req.query.completed) {
-    match.completed = req.query.completed === 'true' // Converting from string to boolean
-  }
-
-  if (req.query.sortBy) {
-    const parts = req.query.sortBy.split(':')
-    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-  }
-
+  
   try {
-    await req.user.populate({
-      path: 'tasks',
-      match,
-      options: {
-        limit: parseInt(req.query.limit), // If limit not provided or not a number its ignored
-        skip: parseInt(req.query.skip), // Works same way as limit
-        sort
-      }
-    }).execPopulate()
+    // const tasks = await Task.find({ user: req.user._id }) // This approach also works
+    await req.user.populate('tasks').execPopulate()
     res.send(req.user.tasks)
   } catch (e) {
     res.status(500).send(e)
@@ -77,7 +58,10 @@ router.patch('/tasks/:id', auth, async (req, res) => {
   }
 
   try {
+    // const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    
     const task = await Task.findOne({ _id: req.params.id, user: req.user._id })
+    // const task = await Task.findById(req.params.id)
 
     if (!task) {
       return res.status(404).send()
@@ -94,6 +78,7 @@ router.patch('/tasks/:id', auth, async (req, res) => {
 
 router.delete('/tasks/:id', auth, async (req, res) => {
   try {
+    // const task = await Task.findByIdAndDelete(req.params.id)
     const task = await Task.findOneAndDelete({ _id: req.params.id, user: req.user._id })
 
     if (!task) {

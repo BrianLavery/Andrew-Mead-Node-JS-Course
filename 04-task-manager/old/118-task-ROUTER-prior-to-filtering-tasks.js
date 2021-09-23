@@ -18,32 +18,11 @@ router.post('/tasks', auth, async (req, res) => {
   }
 })
 
-// Tasks index with optional search parameters
-// GET /tasks?completed={true/false}?&limit={int}&skip={int}&sortBy=createdAt:{asc/desc}
-// When pass in 2 values to the params we tend to separate by special character, e.g. '_', ':'
+// Tasks index
 router.get('/tasks', auth, async (req, res) => {
-  const match = {}
-  const sort = {}
-
-  if (req.query.completed) {
-    match.completed = req.query.completed === 'true' // Converting from string to boolean
-  }
-
-  if (req.query.sortBy) {
-    const parts = req.query.sortBy.split(':')
-    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-  }
-
+  
   try {
-    await req.user.populate({
-      path: 'tasks',
-      match,
-      options: {
-        limit: parseInt(req.query.limit), // If limit not provided or not a number its ignored
-        skip: parseInt(req.query.skip), // Works same way as limit
-        sort
-      }
-    }).execPopulate()
+    await req.user.populate('tasks').execPopulate()
     res.send(req.user.tasks)
   } catch (e) {
     res.status(500).send(e)
