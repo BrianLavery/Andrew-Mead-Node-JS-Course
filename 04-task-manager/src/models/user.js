@@ -62,6 +62,15 @@ userSchema.virtual('tasks', {
   foreignField: 'user' // This is what it is stored in in the other collection (i.e. in tasks collection)
 })
 
+// We set up a virtual property - so we can say that a user has many tasks
+// We define name for the field then configure the field in the object
+// The bit below is not stored in the database
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id', // This is connection to the model we are in (user id)
+  foreignField: 'user' // This is what it is stored in in the other collection (i.e. in tasks collection)
+})
+
 // Set public profile for info to send to client
 // userSchema.methods.getPublicProfile = function () {
 //   const user = this
