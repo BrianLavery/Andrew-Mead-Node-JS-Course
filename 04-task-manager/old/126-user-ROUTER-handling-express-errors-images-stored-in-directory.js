@@ -1,6 +1,5 @@
 const express = require('express')
 const multer = require('multer')
-const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 
@@ -93,7 +92,7 @@ router.delete('/users/me', auth, async (req, res) => {
 })
 
 const upload = multer({
-  // dest: 'avatars',
+  dest: 'avatars',
   limits: {
     fileSize: 1000000
   },
@@ -108,38 +107,9 @@ const upload = multer({
 
 // User can upload profile picture
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-  // .png converts to png (no arguments); resize takes object
-  const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-  req.user.avatar = buffer // Sharp has converted image for us to save
-  await req.user.save()
   res.send()
 }, (error, req, res, next) => {
   res.status(400).send({ error: error.message })
-})
-
-// Route to delete avatar picture
-router.delete('/users/me/avatar', auth, async (req, res) => {
-  req.user.avatar = undefined
-  await req.user.save()
-  res.send()
-}, (error, req, res, next) => {
-  res.status(400).send({ error: error.message })
-})
-
-// Route to fetch avatar and get the image back
-router.get('/users/:id/avatar', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id)
-
-    if (!user || !user.avatar) {
-      throw new Error()
-    }
-
-    res.set('Content-Type', 'image/png') // Use this to set headers (key-value pair)
-    res.send(user.avatar)
-  } catch (e) {
-    res.status(404).send()
-  }
 })
 
 module.exports = router
