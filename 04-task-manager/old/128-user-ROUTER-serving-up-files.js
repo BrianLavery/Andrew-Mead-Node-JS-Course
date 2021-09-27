@@ -1,9 +1,7 @@
 const express = require('express')
 const multer = require('multer')
-const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
-const { sendWelcomeEmail, sendCancellationEmail } = require('../emails/account')
 
 const router = new express.Router()
 
@@ -13,7 +11,6 @@ router.post('/users', async (req, res) => {
   
   try {
     await user.save()
-    sendWelcomeEmail(user.email, user.name) // This could be await if we choose - but no need
     const token = await user.generateAuthToken()
     res.status(201).send({ user, token })
   } catch (e) {
@@ -84,19 +81,16 @@ router.patch('/users/me', auth, async (req, res) => {
   }
 })
 
-// User delete profile route
 // One option is to delete tasks from here but in general better to use middleware
 router.delete('/users/me', auth, async (req, res) => {
   try {
     await req.user.remove() // This removes the authenticated user in one command (Mongoose method)
-    sendCancellationEmail(req.user.email, req.user.name)
     res.send(req.user)
   } catch (e) {
     res.status(500).send()
   }
 })
 
-// Multer configuration for file upload
 const upload = multer({
   // dest: 'avatars',
   limits: {
@@ -113,9 +107,7 @@ const upload = multer({
 
 // User can upload profile picture
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-  // .png converts to png (no arguments); resize takes object
-  const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-  req.user.avatar = buffer // Sharp has converted image for us to save
+  req.user.avatar = req.file.buffer // Contains buffer of all binary data for file (can only access if no "dest" option set up)
   await req.user.save()
   res.send()
 }, (error, req, res, next) => {
@@ -140,7 +132,7 @@ router.get('/users/:id/avatar', async (req, res) => {
       throw new Error()
     }
 
-    res.set('Content-Type', 'image/png') // Use this to set headers (key-value pair)
+    res.set('Content-Type', 'image/jpg') // Use this to set headers (key-value pair)
     res.send(user.avatar)
   } catch (e) {
     res.status(404).send()
