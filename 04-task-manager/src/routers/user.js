@@ -60,8 +60,7 @@ router.post('/users/logoutAll', auth, async (req, res) => {
 })
 
 // Show user
-router.get('/users/me', auth, async (req, res) => {
-  console.log('In the users/me route')
+router.get('/users/me', auth, (req, res) => {
   res.send(req.user)
 })
 

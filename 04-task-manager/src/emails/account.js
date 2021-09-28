@@ -1,9 +1,7 @@
 const sgMail = require('@sendgrid/mail')
 
 // This is the "Task App" api key
-const sendgridAPIKey = "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"
-
-sgMail.setApiKey(sendgridAPIKey)
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 // This function returns a promise so we could use async await to wait on it if we want (we don't)
 const sendWelcomeEmail = (email, name) => {
@@ -30,3 +28,12 @@ module.exports = {
   sendWelcomeEmail,
   sendCancellationEmail
 }
+
+// sgMail.setApiKey(sendgridAPIKey)
+
+// sgMail.send({
+//   to: 'brianplavery@gmail.com',
+//   from: 'brianplavery@gmail.com',
+//   subject: 'My gmail email',
+//   text: 'Should only receive this one.'
+// })
