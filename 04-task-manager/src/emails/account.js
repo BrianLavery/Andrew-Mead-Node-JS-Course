@@ -28,12 +28,3 @@ module.exports = {
   sendWelcomeEmail,
   sendCancellationEmail
 }
-
-// sgMail.setApiKey(sendgridAPIKey)
-
-// sgMail.send({
-//   to: 'brianplavery@gmail.com',
-//   from: 'brianplavery@gmail.com',
-//   subject: 'My gmail email',
-//   text: 'Should only receive this one.'
-// })
