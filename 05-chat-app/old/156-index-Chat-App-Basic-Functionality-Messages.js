@@ -18,24 +18,12 @@ app.use(express.static(publicDirectoryPath))
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
 
-    // socket.emit sends only to this connection
     socket.emit('message', 'Welcome!')
-    // socket.broadcast.emit sends only to all connections except this one
-    socket.broadcast.emit('message', 'A new user has joined!') 
 
     socket.on('sendMessage', (message) => {
-      // io.emit sends to all connections including this one
       io.emit('message', message)
     })
 
-    socket.on('sendLocation', (coords) => {
-      io.emit('message', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`)
-    })
-
-    // Use code below for a disconnection - it's a built in event
-    socket.on('disconnect', () => {
-      io.emit('message', 'A user has left')
-    })
 })
 
 server.listen(port, () => {
