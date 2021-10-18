@@ -9,7 +9,14 @@ document.querySelector('#message-form').addEventListener('submit', (e) => {
 
     const message = e.target.elements.message.value // We second last value references the 'name' attribute
     
-    socket.emit('sendMessage', message)
+    // Emit - we provide event name, data (as many as want), then function to run as event acknowledgement
+    socket.emit('sendMessage', message, (error) => {
+        if (error) {
+            return console.log(error)
+        }
+            
+        console.log('Message delivered')
+    })
 })
 
 document.querySelector('#share-location').addEventListener('click', () => {
@@ -25,6 +32,8 @@ document.querySelector('#share-location').addEventListener('click', () => {
         socket.emit('sendLocation', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
+        }, (error) => {
+            console.log('Location shared!')
         })
     }) 
 })
