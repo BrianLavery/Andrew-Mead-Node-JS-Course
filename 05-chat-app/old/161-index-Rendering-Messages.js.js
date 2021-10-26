@@ -3,7 +3,6 @@ const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words') // npm module to check for profanity
-const { generateMessage, generateLocationMessage } = require('./utils/messages')
 
 const app = express()
 const server = http.createServer(app)
@@ -21,9 +20,9 @@ io.on('connection', (socket) => {
     console.log('New WebSocket connection')
 
     // socket.emit sends only to this connection
-    socket.emit('message', generateMessage('Welcome!'))
+    socket.emit('message', 'Welcome!')
     // socket.broadcast.emit sends only to all connections except this one
-    socket.broadcast.emit('message', generateMessage('A new user has joined!')) 
+    socket.broadcast.emit('message', 'A new user has joined!') 
 
     // We add on the acknowledgement function from the client as a callback here
     socket.on('sendMessage', (message, callback) => {
@@ -34,18 +33,18 @@ io.on('connection', (socket) => {
       }
 
       // io.emit sends to all connections including this one
-      io.emit('message', generateMessage(message))
+      io.emit('message', message)
       callback() // Can pass in argument
     })
 
     socket.on('sendLocation', (coords, callback) => {
-      io.emit('locationMessage', generateLocationMessage(coords))
+      io.emit('message', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`)
       callback()
     })
 
     // Use code below for a disconnection - it's a built in event
     socket.on('disconnect', () => {
-      io.emit('message', generateMessage('A user has left'))
+      io.emit('message', 'A user has left')
     })
 })
 
