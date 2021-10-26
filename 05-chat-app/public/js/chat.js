@@ -1,16 +1,29 @@
 const socket = io()
 
+// Elements ($ just means we know it's a DOM element - convention)
+const $messageForm = document.querySelector('#message-form')
+const $messageFormInput = $messageForm.querySelector('input')
+const $messageFormButton = $messageForm.querySelector('button')
+const $sendLocationButton = document.querySelector('#share-location')
+
+
 socket.on('message', (message) => {
     console.log(message)
 })
 
-document.querySelector('#message-form').addEventListener('submit', (e) => {
+$messageForm.addEventListener('submit', (e) => {
     e.preventDefault()
+
+    $messageFormButton.setAttribute('disabled', 'disabled')
 
     const message = e.target.elements.message.value // We second last value references the 'name' attribute
     
     // Emit - we provide event name, data (as many as want), then function to run as event acknowledgement
     socket.emit('sendMessage', message, (error) => {
+        $messageFormButton.removeAttribute('disabled') // Re-enable submit button
+        $messageFormInput.value = '' // Clear input
+        $messageFormInput.focus() // Brings focus back to input
+        
         if (error) {
             return console.log(error)
         }
@@ -19,12 +32,15 @@ document.querySelector('#message-form').addEventListener('submit', (e) => {
     })
 })
 
-document.querySelector('#share-location').addEventListener('click', () => {
+$sendLocationButton.addEventListener('click', () => {
+    
     // If navigator geolocation exists then user can access it
     // If it does not exist they cannot share their location - so we use an if statement
     if (!navigator.geolocation) {
         return alert('Geolocation is not supported by your browser')
     }
+    
+    $sendLocationButton.setAttribute('disabled', 'disabled') // disable button
 
     // getCurrentPosition is asynchronous but doesn't support the promise API
     // So we use a callback function that gets access to "position" object
@@ -32,7 +48,9 @@ document.querySelector('#share-location').addEventListener('click', () => {
         socket.emit('sendLocation', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
-        }, (error) => {
+        }, () => {
+            $sendLocationButton.removeAttribute('disabled') // re-enable button
+
             console.log('Location shared!')
         })
     }) 
