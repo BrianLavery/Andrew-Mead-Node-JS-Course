@@ -21,8 +21,8 @@ app.use(express.static(publicDirectoryPath))
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
 
-    socket.on('join', (options, callback) => {
-      const { error, user } = addUser({ id: socket.id, ...options }) // We use spread operator here as we passed in an object
+    socket.on('join', ({ username, room }, callback) => {
+      const { error, user } = addUser({ id: socket.id, username, room })
 
       if (error) {
         return callback(error)
